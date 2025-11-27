@@ -1,0 +1,26 @@
+FROM python:3.11-slim
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    libssl-dev \
+    libjson-c-dev \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiar y instalar requirements
+COPY api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar aplicación
+COPY api/ .
+
+# Exponer puerto
+EXPOSE 5000
+
+# Comando de inicio
+CMD ["python", "app.py"]

@@ -1,0 +1,68 @@
+services:
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: cryptosrs-db
+    environment:
+      POSTGRES_USER: cryptosrs_user
+      POSTGRES_PASSWORD: secure_password_123
+      POSTGRES_DB: cryptosrs_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ctf-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cryptosrs_user" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # API Backend Flask
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: cryptosrs-api
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+      - DATABASE_URL=postgresql://cryptosrs_user:secure_password_123@db:5432/cryptosrs_db
+      - SECRET_KEY=your-secret-key-change-this-in-production
+      - JWT_SECRET_KEY=jwt-secret-key-change-this-in-production
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./api:/app
+      - ./flags:/flags:ro
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ctf-network
+    restart: unless-stopped
+
+  # Frontend Web Nginx
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: cryptosrs-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+    networks:
+      - ctf-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+
+networks:
+  ctf-network:
+    driver: bridge
