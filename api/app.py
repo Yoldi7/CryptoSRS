@@ -58,9 +58,9 @@ def create_app():
 def init_coins():
     """Inicializar precios de monedas"""
     coins = [
-        {'coin': 'flagcoin', 'buy_price': 1000.0, 'sell_price': 950.0},
-        {'coin': 'Bitcoin', 'buy_price': 50000.0, 'sell_price': 49500.0},
-        {'coin': 'Ethereum', 'buy_price': 3000.0, 'sell_price': 2950.0},
+        {'coin': 'FlagCoin', 'buy_price': 1000.0, 'sell_price': 950.0},
+        {'coin': 'BitCoin', 'buy_price': 50000.0, 'sell_price': 49500.0},
+        {'coin': 'PribaitCoin', 'buy_price': 3000.0, 'sell_price': 2950.0},
         {'coin': 'CTFcoin', 'buy_price': 100.0, 'sell_price': 95.0},
     ]
     
