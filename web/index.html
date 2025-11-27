@@ -4,30 +4,932 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CryptoSRS - Trading Platform</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .header .user-info {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.95;
+        }
+
+        .auth-container {
+            padding: 40px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            font-weight: bold;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: #ffe6e6;
+            color: #c0392b;
+            border-left: 4px solid #c0392b;
+        }
+
+        .alert-success {
+            background: #e6ffe6;
+            color: #27ae60;
+            border-left: 4px solid #27ae60;
+        }
+
+        .dashboard {
+            display: none;
+            padding: 30px;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .wallet-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .wallet-item .coin-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .wallet-item .balance {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .coin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .coin-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .coin-info {
+            flex: 1;
+        }
+
+        .coin-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .coin-prices {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .price {
+            font-size: 0.9em;
+        }
+
+        .price-buy {
+            color: #27ae60;
+        }
+
+        .price-sell {
+            color: #e74c3c;
+        }
+
+        .coin-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .order-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .order-type {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .order-type.buy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .order-type.sell {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .order-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .order-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .order-status.cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .order-detail {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+        }
+    </style>
 </head>
 <body>
-    <div class="app" id="app">
-        <nav class="navbar" id="main-navbar">
-            <div class="navbar-brand">
-                <h2>CryptoSRS</h2>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 CryptoSRS</h1>
+            <p class="subtitle">Advanced Trading Platform</p>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span id="username"></span> | <span id="accountLevel"></span>
             </div>
-                <nav class="navbar-menu">
-                <a href="#" class="nav-link" data-page="trading">Trading</a>
-                <a href="#" class="nav-link" data-page="bot" style="display:none;">Bot</a>
-                <a href="#" class="nav-link" data-page="profile">Profile</a>
-                <a href="#" class="nav-link" id="logout-btn">Logout</a>
+        </div>
+
+        <!-- Auth Container -->
+        <div class="auth-container" id="authContainer">
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchTab('register')">Register</button>
             </div>
-        </nav>
-        <div id="content-container"></div>
+
+            <div id="authAlert" class="alert"></div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="registerUsername" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">Register</button>
+            </form>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard" id="dashboard">
+            <div class="dashboard-grid">
+                <!-- Wallet Card -->
+                <div class="card">
+                    <h3>💰 My Wallet</h3>
+                    <div id="walletContent">
+                        <div class="loading">Loading wallet...</div>
+                    </div>
+                </div>
+
+                <!-- Market Card -->
+                <div class="card">
+                    <h3>📈 Market Prices</h3>
+                    <div id="marketContent">
+                        <div class="loading">Loading market...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 My Orders</h3>
+                <div id="ordersContent">
+                    <div class="loading">Loading orders...</div>
+                </div>
+                <button class="btn btn-secondary" onclick="loadOrders()" style="margin-top: 15px;">Refresh Orders</button>
+            </div>
+
+            <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
+        </div>
     </div>
 
-    <script src="js/api.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/trading.js"></script>
-    <script src="js/bot.js"></script>
-    <script src="js/ui.js"></script>
-    <!-- ui.js handles initialization and loads the dashboard or auth page depending on token -->
+    <!-- Trading Modal -->
+    <div class="modal" id="tradingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Trade</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalAlert" class="alert"></div>
+            <form id="tradingForm" onsubmit="handleTrade(event)">
+                <input type="hidden" id="tradeCoin">
+                <input type="hidden" id="tradeType">
+                
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="tradeAmount" step="0.00000001" min="0.00000001" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Price Type</label>
+                    <select id="tradePriceType" onchange="togglePriceInput()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        <option value="market">Market Price</option>
+                        <option value="limit">Limit Order</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="targetPriceGroup" style="display: none;">
+                    <label>Target Price (USD)</label>
+                    <input type="number" id="tradeTargetPrice" step="0.01" min="0.01">
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="tradeSubmitBtn">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let authToken = null;
+        let currentUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                authToken = token;
+                loadDashboard();
+            }
+        });
+
+        // Auth Functions
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + 'Form').classList.add('active');
+            hideAlert('authAlert');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.access_token;
+                    currentUser = data.user;
+                    localStorage.setItem('authToken', authToken);
+                    showAlert('authAlert', 'Login successful!', 'success');
+                    setTimeout(() => loadDashboard(), 500);
+                } else {
+                    showAlert('authAlert', data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showAlert('authAlert', 'Connection error', 'error');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('authAlert', 'Registration successful! Please login.', 'success');
+                    setTimeout(() => {
+                        switchTab('login');
+                        document.getElementById('loginUsername').value = username;
+                    }, 1500);
+                } else {
+                    showAlert('authAlert', data.error || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showAlert('authAlert', 'Connection error', 'error');
+            }
+        }
+
+        function handleLogout() {
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            document.getElementById('authContainer').style.display = 'block';
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        // Dashboard Functions
+        async function loadDashboard() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            
+            // Load user info
+            await loadUserInfo();
+            
+            // Load data
+            await Promise.all([
+                loadWallet(),
+                loadMarket(),
+                loadOrders()
+            ]);
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data;
+                    document.getElementById('username').textContent = data.username;
+                    document.getElementById('accountLevel').textContent = data.account_level.toUpperCase();
+                    document.getElementById('userInfo').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+            }
+        }
+
+        async function loadWallet() {
+            try {
+                const response = await fetch(`${API_URL}/trading/wallet`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    const wallets = await response.json();
+                    displayWallet(wallets);
+                }
+            } catch (error) {
+                document.getElementById('walletContent').innerHTML = '<div class="empty-state">Error loading wallet</div>';
+            }
+        }
+
+        function displayWallet(wallets) {
+            const container = document.getElementById('walletContent');
+            
+            if (wallets.length === 0) {
+                container.innerHTML = '<div class="empty-state">No wallets found</div>';
+                return;
+            }
+
+            container.innerHTML = wallets.map(wallet => `
+                <div class="wallet-item">
+                    <span class="coin-name">${wallet.coin}</span>
+                    <span class="balance">${wallet.available.toFixed(8)}</span>
+                </div>
+            `).join('');
+        }
+
+        async function loadMarket() {
+            try {
+                const response = await fetch(`${API_URL}/trading/coins`);
+
+                if (response.ok) {
+                    const coins = await response.json();
+                    displayMarket(coins);
+                }
+            } catch (error) {
+                document.getElementById('marketContent').innerHTML = '<div class="empty-state">Error loading market</div>';
+            }
+        }
+
+        function displayMarket(coins) {
+            const container = document.getElementById('marketContent');
+            
+            container.innerHTML = coins.map(coin => `
+                <div class="coin-item">
+                    <div class="coin-info">
+                        <div class="coin-name">${coin.coin}</div>
+                        <div class="coin-prices">
+                            <span class="price price-buy">Buy: $${coin.buy_price.toFixed(2)}</span>
+                            <span class="price price-sell">Sell: $${coin.sell_price.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="coin-actions">
+                        <button class="btn-small btn-success" onclick="openTradeModal('${coin.coin}', 'BUY', ${coin.buy_price})">Buy</button>
+                        <button class="btn-small btn-danger" onclick="openTradeModal('${coin.coin}', 'SELL', ${coin.sell_price})">Sell</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_URL}/trading/orders`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    const orders = await response.json();
+                    displayOrders(orders);
+                }
+            } catch (error) {
+                document.getElementById('ordersContent').innerHTML = '<div class="empty-state">Error loading orders</div>';
+            }
+        }
+
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersContent');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-state">No orders yet</div>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-type ${order.order_type.toLowerCase()}">${order.order_type}</span>
+                        <span class="order-status ${order.status}">${order.status.toUpperCase()}</span>
+                    </div>
+                    <div class="order-details">
+                        <div class="order-detail">
+                            <span>Coin:</span>
+                            <strong>${order.coin}</strong>
+                        </div>
+                        <div class="order-detail">
+                            <span>Amount:</span>
+                            <strong>${order.amount}</strong>
+                        </div>
+                        <div class="order-detail">
+                            <span>Price:</span>
+                            <strong>$${order.target_price.toFixed(2)}</strong>
+                        </div>
+                        <div class="order-detail">
+                            <span>Type:</span>
+                            <strong>${order.price_type}</strong>
+                        </div>
+                    </div>
+                    ${order.status === 'pending' ? `
+                        <div class="order-actions">
+                            <button class="btn-small btn-success" onclick="executeOrder(${order.id})">Execute</button>
+                            <button class="btn-small btn-danger" onclick="cancelOrder(${order.id})">Cancel</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Trading Functions
+        function openTradeModal(coin, type, price) {
+            document.getElementById('tradeCoin').value = coin;
+            document.getElementById('tradeType').value = type;
+            document.getElementById('modalTitle').textContent = `${type} ${coin}`;
+            document.getElementById('tradeAmount').value = '';
+            document.getElementById('tradePriceType').value = 'market';
+            document.getElementById('tradeTargetPrice').value = price;
+            document.getElementById('targetPriceGroup').style.display = 'none';
+            hideAlert('modalAlert');
+            document.getElementById('tradingModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('tradingModal').classList.remove('active');
+        }
+
+        function togglePriceInput() {
+            const priceType = document.getElementById('tradePriceType').value;
+            const targetPriceGroup = document.getElementById('targetPriceGroup');
+            
+            if (priceType === 'limit') {
+                targetPriceGroup.style.display = 'block';
+                document.getElementById('tradeTargetPrice').required = true;
+            } else {
+                targetPriceGroup.style.display = 'none';
+                document.getElementById('tradeTargetPrice').required = false;
+            }
+        }
+
+        async function handleTrade(e) {
+            e.preventDefault();
+            
+            const coin = document.getElementById('tradeCoin').value;
+            const amount = parseFloat(document.getElementById('tradeAmount').value);
+            const orderType = document.getElementById('tradeType').value;
+            const priceType = document.getElementById('tradePriceType').value;
+            const targetPrice = parseFloat(document.getElementById('tradeTargetPrice').value);
+
+            try {
+                const response = await fetch(`${API_URL}/trading/create-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        coin,
+                        amount,
+                        order_type: orderType,
+                        price_type: priceType,
+                        target_price: targetPrice
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('modalAlert', 'Order created successfully!', 'success');
+                    setTimeout(() => {
+                        closeModal();
+                        loadWallet();
+                        loadOrders();
+                    }, 1000);
+                } else {
+                    showAlert('modalAlert', data.error || 'Order creation failed', 'error');
+                }
+            } catch (error) {
+                showAlert('modalAlert', 'Connection error', 'error');
+            }
+        }
+
+        async function executeOrder(orderId) {
+            try {
+                const response = await fetch(`${API_URL}/trading/execute-order/${orderId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Order executed successfully!');
+                    loadWallet();
+                    loadOrders();
+                } else {
+                    alert(data.error || 'Execution failed');
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            try {
+                const response = await fetch(`${API_URL}/trading/cancel-order/${orderId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Order cancelled successfully!');
+                    loadWallet();
+                    loadOrders();
+                } else {
+                    alert(data.error || 'Cancellation failed');
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        // Utility Functions
+        function showAlert(elementId, message, type) {
+            const alert = document.getElementById(elementId);
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+        }
+
+        function hideAlert(elementId) {
+            const alert = document.getElementById(elementId);
+            alert.classList.remove('show');
+        }
+    </script>
 </body>
 </html>
