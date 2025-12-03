@@ -17,7 +17,11 @@ def create_app():
     
     # Inicializar extensiones
     db.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": config.CORS_ORIGINS}})
+    CORS(app, resources={r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }})
     jwt = JWTManager(app)
     
     # Registrar blueprints
@@ -58,7 +62,7 @@ def create_app():
 def init_coins():
     """Inicializar precios de monedas"""
     coins = [
-        {'coin': 'FlagCoin', 'buy_price': 1000.0, 'sell_price': 950.0},
+        {'coin': 'FlagCoin', 'buy_price': 1000000.0, 'sell_price': 999000.0},
         {'coin': 'BitCoin', 'buy_price': 50000.0, 'sell_price': 49500.0},
         {'coin': 'PribaitCoin', 'buy_price': 3000.0, 'sell_price': 2950.0},
         {'coin': 'CTFcoin', 'buy_price': 100.0, 'sell_price': 95.0},
@@ -69,6 +73,10 @@ def init_coins():
         if not coin:
             coin = CoinPrice(**coin_data)
             db.session.add(coin)
+        else:
+            # Actualizar precios si ya existe
+            coin.buy_price = coin_data['buy_price']
+            coin.sell_price = coin_data['sell_price']
     
     db.session.commit()
 

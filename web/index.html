@@ -378,7 +378,7 @@
                 <span class="brand-dot"></span>
                 <div>
                     <div style="font-size:1.05rem;">CryptoSRS</div>
-                    <small style="color:var(--muted);">Trading educativo</small>
+                    <small style="color:var(--muted);">El mercado de trading más seguro de la UPNA</small>
                 </div>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
@@ -445,6 +445,7 @@
 
         <!-- Dashboard -->
         <section class="dashboard" id="dashboard">
+            <div id="dashboardAlert" class="alert"></div>
             <div class="card-grid">
                 <article class="card">
                     <h3>Cartera <small>(CTFcoin y crypto)</small></h3>
@@ -467,6 +468,15 @@
                     </div>
                 </article>
             </div>
+
+            <!-- Botón para comprar el plan premium -->
+            <div class="card" id="buyPremiumCard">
+                <h3>Comprar Plan Premium</h3>
+                <p><strong>Precio: 1.0 FlagCoin</strong></p>
+                <p>Al comprar este plan premium obtendrás la flag y te convertirás en usuario premium.</p>
+                <button class="btn btn-primary" onclick="buyPremiumPlan()">💎 Comprar Plan Premium</button>
+            </div>
+            <div class="card" id="premiumCard" style="display:none;"></div>
         </section>
     </div>
 
@@ -609,6 +619,7 @@
             document.getElementById('dashboard').classList.add('active');
             await loadUserInfo();
             await Promise.all([loadWallet(), loadMarket(), loadOrders()]);
+            await showPremiumCard();
         }
 
         async function loadUserInfo() {
@@ -933,6 +944,69 @@
                 }
             } catch (error) {
                 alert('Error de conexión');
+            }
+        }
+
+        async function buyPremiumPlan() {
+            try {
+                const response = await fetch(`${API_URL}/flags/buy-premium`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showAlert('dashboardAlert', `¡Felicidades! ${data.message}\n\nFlag: ${data.flag}\n\nBalance restante: ${data.remaining_balance.toFixed(8)} FlagCoin`, 'success');
+                    // Actualizar el estado del usuario a premium
+                    document.getElementById('userInfo').innerHTML = `<strong>${currentUser}</strong> <small>Premium ⭐</small>`;
+                    document.getElementById('userInfo').style.display = 'flex';
+                    await loadWallet(); // Actualizar el balance de FlagCoin
+                } else {
+                    showAlert('dashboardAlert', data.message || 'No tienes suficientes FlagCoin para comprar el plan premium.', 'error');
+                }
+            } catch (error) {
+                showAlert('dashboardAlert', 'Error de conexión.', 'error');
+            }
+        }
+
+        async function showPremiumCard() {
+            // Oculta la tarjeta de compra y muestra la flag si eres premium
+            const premiumCard = document.getElementById('premiumCard');
+            const buyCard = document.getElementById('buyPremiumCard');
+            if (currentUser && currentUser.account_level === 'premium') {
+                // Obtener la flag del backend
+                try {
+                    const response = await fetch(`${API_URL}/flags/user`, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.flag) {
+                        premiumCard.innerHTML = `
+                            <h3>🎉 ¡Eres usuario premium!</h3>
+                            <p>Tu flag es:</p>
+                            <div style='font-size:1.2rem;word-break:break-all;background:rgba(0,230,118,0.08);border-radius:8px;padding:12px 16px;margin:12px 0;border:1px solid var(--accent);color:var(--accent);font-weight:700;'>${data.flag}</div>
+                            <p>¡Felicidades por completar el reto!</p>
+                        `;
+                        premiumCard.style.display = 'block';
+                        buyCard.style.display = 'none';
+                    } else {
+                        premiumCard.innerHTML = `<h3>🎉 ¡Eres usuario premium!</h3><p>No se pudo cargar la flag.</p>`;
+                        premiumCard.style.display = 'block';
+                        buyCard.style.display = 'none';
+                    }
+                } catch (error) {
+                    premiumCard.innerHTML = `<h3>🎉 ¡Eres usuario premium!</h3><p>Error de conexión al cargar la flag.</p>`;
+                    premiumCard.style.display = 'block';
+                    buyCard.style.display = 'none';
+                }
+            } else {
+                premiumCard.style.display = 'none';
+                buyCard.style.display = 'block';
             }
         }
 

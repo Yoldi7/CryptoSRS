@@ -4,7 +4,7 @@ from datetime import timedelta
 class Config:
     """Configuración base"""
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key-development')
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'secreto_muy_secreto')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=30)
     
     # CORS

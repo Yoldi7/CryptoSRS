@@ -22,8 +22,15 @@ def create_order():
     if amount <= 0:
         return jsonify({'error': 'Invalid amount'}), 400
         
-    # Verificar precio actual
+    # Verificar precio actual (permitir alias en minúsculas)
     coin_price = CoinPrice.query.filter_by(coin=coin_name).first()
+    if not coin_price and isinstance(coin_name, str):
+        # Intentar con capitalización tipo título
+        alt_name = coin_name.capitalize()
+        coin_price = CoinPrice.query.filter_by(coin=alt_name).first()
+        # Alias específico
+        if not coin_price and coin_name.lower() == 'flagcoin':
+            coin_price = CoinPrice.query.filter_by(coin='FlagCoin').first()
     if not coin_price:
         return jsonify({'error': 'Coin not found'}), 404
         
@@ -63,7 +70,43 @@ def create_order():
     
     db.session.add(order)
     db.session.commit()
-    
+
+    # Auto-ejecutar si es a mercado
+    if price_type == 'market':
+        # Simular el mismo comportamiento de execute_order sin verificar estado externo
+        usd_wallet = Wallet.query.filter_by(user_id=user_id, coin='USD').first()
+        if not usd_wallet:
+            usd_wallet = Wallet(user_id=user_id, coin='USD', balance=0.0)
+            db.session.add(usd_wallet)
+        coin_wallet = Wallet.query.filter_by(user_id=user_id, coin=coin_name).first()
+        if not coin_wallet:
+            coin_wallet = Wallet(user_id=user_id, coin=coin_name, balance=0.0)
+            db.session.add(coin_wallet)
+
+        if order_type == 'BUY':
+            total_cost = amount * target_price
+            # Desbloquear y descontar USD
+            usd_wallet.locked_balance = max(0.0, usd_wallet.locked_balance - total_cost)
+            usd_wallet.balance -= total_cost
+            # Añadir moneda
+            coin_wallet.balance += amount
+        elif order_type == 'SELL':
+            total_gain = amount * target_price
+            # Desbloquear y descontar moneda
+            coin_wallet.locked_balance = max(0.0, coin_wallet.locked_balance - amount)
+            coin_wallet.balance -= amount
+            # Añadir USD
+            usd_wallet.balance += total_gain
+
+        order.status = 'completed'
+        order.executed_price = target_price
+        order.completed_at = datetime.utcnow()
+        db.session.commit()
+        return jsonify({
+            'message': 'Order executed (market)',
+            'order': order.to_dict()
+        }), 200
+
     return jsonify({
         'message': 'Order created',
         'order': order.to_dict()
@@ -115,8 +158,10 @@ def execute_order(order_id):
     
     # Procesar transacción
     usd_wallet = Wallet.query.filter_by(user_id=user_id, coin='USD').first()
+    if not usd_wallet:
+        usd_wallet = Wallet(user_id=user_id, coin='USD', balance=0.0)
+        db.session.add(usd_wallet)
     coin_wallet = Wallet.query.filter_by(user_id=user_id, coin=order.coin).first()
-    
     if not coin_wallet:
         coin_wallet = Wallet(user_id=user_id, coin=order.coin, balance=0.0)
         db.session.add(coin_wallet)
